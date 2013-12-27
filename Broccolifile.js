@@ -1,12 +1,13 @@
 module.exports = function (factory, broccoli) {
   var CoffeeScriptPreprocessor = require('broccoli-coffee')(broccoli)
+  var TemplatePreprocessor = require('broccoli-template')(broccoli)
 
   var appPkg = factory.makePackage()
     .map({
       'app': '/appkit',
     })
     .addTransformer(new broccoli.PreprocessorPipeline()
-      .addPreprocessor(new broccoli.transformers.preprocessors.ES6TemplatePreprocessor({
+      .addPreprocessor(new TemplatePreprocessor({
         extensions: ['hbs', 'handlebars'],
         compileFunction: 'Ember.Handlebars.compile'
       }))

@@ -53,6 +53,7 @@
     "originate": "~0.1.5",
     "loom": "~3.1.2",
     "broccoli": "latest",
-    "broccoli-coffee": "latest"
+    "broccoli-coffee": "latest",
+    "broccoli-template": "latest"
   }
 }
