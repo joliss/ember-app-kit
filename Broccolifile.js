@@ -1,4 +1,6 @@
 module.exports = function (factory, broccoli) {
+  var CoffeeScriptPreprocessor = require('broccoli-coffee')(broccoli)
+
   var appPkg = factory.makePackage()
     .map({
       'app': '/appkit',
@@ -8,10 +10,8 @@ module.exports = function (factory, broccoli) {
         extensions: ['hbs', 'handlebars'],
         compileFunction: 'Ember.Handlebars.compile'
       }))
-      .addPreprocessor(new broccoli.transformers.preprocessors.CoffeeScriptPreprocessor({
-        coffeeScriptOptions: {
-          bare: true
-        }
+      .addPreprocessor(new CoffeeScriptPreprocessor({
+        bare: true
       }))
     )
 
