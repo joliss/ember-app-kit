@@ -1,4 +1,6 @@
 module.exports = function (broccoli) {
+  var ES6ConcatenatorCompiler = require('broccoli-es6-concatenator')(broccoli)
+
   var mainPackages = broccoli.readers.Package.fromDirectory('.') // improve API
   var bowerPackages = broccoli.readers.bowerPackages('vendor')
 
@@ -9,7 +11,7 @@ module.exports = function (broccoli) {
     })
     .setReader(new broccoli.readers.PackageReader(packages))
     .addTransformer(new broccoli.CompilerCollection()
-      .addCompiler(new broccoli.transformers.compilers.ES6ConcatenatorCompiler({
+      .addCompiler(new ES6ConcatenatorCompiler({
         loaderFile: 'loader.js',
         ignoredModules: [
           'resolver'
