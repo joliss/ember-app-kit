@@ -1,5 +1,6 @@
 module.exports = function (broccoli) {
   var ES6ConcatenatorCompiler = require('broccoli-es6-concatenator')(broccoli)
+  var StaticCompiler = require('broccoli-static-compiler')(broccoli)
 
   var mainPackages = broccoli.readers.Package.fromDirectory('.') // improve API
   var bowerPackages = broccoli.readers.bowerPackages('vendor')
@@ -28,12 +29,12 @@ module.exports = function (broccoli) {
         ],
         outputFile: '/assets/app.js'
       }))
-      .addCompiler(new broccoli.transformers.compilers.StaticFileCompiler({
+      .addCompiler(new StaticCompiler({
         srcDir: 'appkit-public',
         destDir: '/'
       }))
-      .addCompiler(new broccoli.transformers.compilers.StaticFileCompiler({
-        srcDir: 'appkit',
+      .addCompiler(new StaticCompiler({
+        srcDir: '/appkit',
         files: ['*.html'],
         destDir: '/'
       }))
