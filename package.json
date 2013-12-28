@@ -53,8 +53,9 @@
     "originate": "~0.1.5",
     "loom": "~3.1.2",
     "broccoli": "latest",
-    "broccoli-coffee": "latest",
-    "broccoli-template": "latest",
-    "broccoli-es6-concatenator": "latest"
+    "broccoli-coffee": "~0.0.1",
+    "broccoli-template": "~0.0.1",
+    "broccoli-es6-concatenator": "~0.0.1",
+    "broccoli-static-compiler": "~0.0.1"
   }
 }
