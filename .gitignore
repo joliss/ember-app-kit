@@ -10,6 +10,7 @@
 !/vendor/loader.js
 
 # misc
+/*.tmp
 /.sass-cache
 /connect.lock
 /libpeerconnection.log
