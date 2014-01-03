@@ -2,7 +2,7 @@ module.exports = function (factory, broccoli) {
   var CoffeeScriptPreprocessor = require('broccoli-coffee')(broccoli)
   var TemplatePreprocessor = require('broccoli-template')(broccoli)
 
-  var appPkg = factory.makePackage()
+  var appPkg = factory.makeTree()
     .map({
       'app': '/appkit',
     })
@@ -16,7 +16,7 @@ module.exports = function (factory, broccoli) {
       }))
     )
 
-  var publicPkg = factory.makePackage()
+  var publicPkg = factory.makeTree()
     .map({
       // The public files get a completely separate namespace so we don't
       // accidentally match them with compiler glob patterns
