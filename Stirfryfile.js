@@ -5,9 +5,7 @@ module.exports = function (factory, broccoli) {
   var StaticCompiler = require('broccoli-static-compiler')(broccoli)
 
   var appTree = factory.makeTree()
-    .map({
-      'app': '/appkit',
-    })
+    .map('app', '/appkit')
     .addTransformer(new broccoli.PreprocessorPipeline()
       .addPreprocessor(new TemplatePreprocessor({
         extensions: ['hbs', 'handlebars'],
@@ -19,11 +17,9 @@ module.exports = function (factory, broccoli) {
     )
 
   var publicTree = factory.makeTree()
-    .map({
-      // The public files get a completely separate namespace so we don't
-      // accidentally match them with compiler glob patterns
-      'public': '/appkit-public'
-    })
+    // The public files get a completely separate namespace so we don't
+    // accidentally match them with compiler glob patterns
+    .map('public', '/appkit-public')
 
   var builder = factory.makeBuilder()
     .addTrees([appTree, publicTree])
