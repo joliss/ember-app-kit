@@ -16,6 +16,10 @@ module.exports = function (factory, broccoli) {
       }))
     )
 
+  if (factory.env !== 'production') {
+    appTree.map('tests', '/appkit/tests')
+  }
+
   var publicTree = factory.makeTree()
     // The public files get a completely separate namespace so we don't
     // accidentally match them with compiler glob patterns
@@ -52,6 +56,10 @@ module.exports = function (factory, broccoli) {
         destDir: '/'
       }))
     )
+
+  // if (factory.env === 'production') {
+  //   builder.addTransformer(minifyAllTheThings)
+  // }
 
   return builder
 }
