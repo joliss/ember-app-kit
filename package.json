@@ -55,7 +55,7 @@
     "broccoli": "latest",
     "broccoli-coffee": "~0.0.1",
     "broccoli-template": "~0.0.1",
-    "broccoli-es6-concatenator": "~0.0.1",
-    "broccoli-static-compiler": "~0.0.1"
+    "broccoli-es6-concatenator": "0.0.2",
+    "broccoli-static-compiler": "0.0.2"
   }
 }
