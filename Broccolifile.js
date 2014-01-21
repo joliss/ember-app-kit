@@ -1,20 +1,18 @@
 module.exports = function (factory, broccoli) {
-  var CoffeeScriptPreprocessor = require('broccoli-coffee')(broccoli)
-  var TemplatePreprocessor = require('broccoli-template')(broccoli)
+  var CoffeeScriptFilter = require('broccoli-coffee')(broccoli)
+  var TemplateFilter = require('broccoli-template')(broccoli)
   var ES6ConcatenatorCompiler = require('broccoli-es6-concatenator')(broccoli)
   var StaticCompiler = require('broccoli-static-compiler')(broccoli)
 
   var appTree = factory.makeTree()
     .map('app', '/appkit')
-    .addTransformer(new broccoli.PreprocessorPipeline()
-      .addPreprocessor(new TemplatePreprocessor({
-        extensions: ['hbs', 'handlebars'],
-        compileFunction: 'Ember.Handlebars.compile'
-      }))
-      .addPreprocessor(new CoffeeScriptPreprocessor({
-        bare: true
-      }))
-    )
+    .addTransformer(new TemplateFilter({
+      extensions: ['hbs', 'handlebars'],
+      compileFunction: 'Ember.Handlebars.compile'
+    }))
+    .addTransformer(new CoffeeScriptFilter({
+      bare: true
+    }))
 
   if (factory.env !== 'production') {
     appTree.map('tests', '/appkit/tests')
@@ -25,7 +23,7 @@ module.exports = function (factory, broccoli) {
     // accidentally match them with compiler glob patterns
     .map('public', '/appkit-public')
 
-  var builder = factory.makeBuilder()
+  var outputTree = factory.makeTree()
     .addTrees([appTree, publicTree])
     .addBower()
     .addTransformer(new broccoli.CompilerCollection()
@@ -58,8 +56,8 @@ module.exports = function (factory, broccoli) {
     )
 
   // if (factory.env === 'production') {
-  //   builder.addTransformer(minifyAllTheThings)
+  //   outputTree.addTransformer(minifyAllTheThings)
   // }
 
-  return builder
+  return outputTree
 }
