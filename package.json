@@ -56,6 +56,7 @@
     "broccoli-coffee": "latest",
     "broccoli-template": "latest",
     "broccoli-es6-concatenator": "latest",
-    "broccoli-static-compiler": "latest"
+    "broccoli-static-compiler": "latest",
+    "broccoli-uglify-js": "latest"
   }
 }

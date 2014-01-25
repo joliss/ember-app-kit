@@ -1,6 +1,7 @@
 module.exports = function (factory, broccoli) {
   var CoffeeScriptFilter = require('broccoli-coffee')(broccoli)
   var TemplateFilter = require('broccoli-template')(broccoli)
+  var UglifyJSFilter = require('broccoli-uglify-js')(broccoli)
   var ES6ConcatenatorCompiler = require('broccoli-es6-concatenator')(broccoli)
   var StaticCompiler = require('broccoli-static-compiler')(broccoli)
 
@@ -28,22 +29,24 @@ module.exports = function (factory, broccoli) {
     .addBower()
     .addTransformer(new broccoli.CompilerCollection()
       .addCompiler(new ES6ConcatenatorCompiler({
-        loaderFile: 'loader.js',
-        ignoredModules: [
-          'resolver'
-        ],
-        inputFiles: [
-          'appkit/**/*.js'
-        ],
-        legacyFilesToAppend: [
-          'jquery.js',
-          'handlebars.js',
-          'ember.js',
-          'ember-data.js',
-          'ember-resolver.js'
-        ],
-        outputFile: '/assets/app.js'
-      }))
+          loaderFile: 'loader.js',
+          ignoredModules: [
+            'resolver'
+          ],
+          inputFiles: [
+            'appkit/**/*.js'
+          ],
+          legacyFilesToAppend: [
+            'jquery.js',
+            'handlebars.js',
+            'ember.js',
+            'ember-data.js',
+            'ember-resolver.js'
+          ],
+          outputFile: '/assets/app.js'
+        })
+        .setWrapInEval(factory.env !== 'production')
+      )
       .addCompiler(new StaticCompiler({
         srcDir: 'appkit-public',
         destDir: '/'
@@ -55,9 +58,12 @@ module.exports = function (factory, broccoli) {
       }))
     )
 
-  // if (factory.env === 'production') {
-  //   outputTree.addTransformer(minifyAllTheThings)
-  // }
+  if (factory.env === 'production') {
+    outputTree.addTransformer(new UglifyJSFilter({
+      // mangle: false,
+      // compress: false
+    }))
+  }
 
   return outputTree
 }
