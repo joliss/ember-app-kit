@@ -5,6 +5,7 @@ module.exports = function (factory, broccoli) {
   var ES6ConcatenatorCompiler = require('broccoli-es6-concatenator')(broccoli)
   var StaticCompiler = require('broccoli-static-compiler')(broccoli)
 
+  // Construct the tree for our application files; this tree
   var appTree = factory.makeTree()
     .map('app', '/appkit')
     .addTransformer(new TemplateFilter({
@@ -19,51 +20,52 @@ module.exports = function (factory, broccoli) {
     appTree.map('tests', '/appkit/tests')
   }
 
-  var publicTree = factory.makeTree()
-    // The public files get a completely separate namespace so we don't
-    // accidentally match them with compiler glob patterns
-    .map('public', '/appkit-public')
-
-  var outputTree = factory.makeTree()
+  var inputTrees = new broccoli.InputTreeCollection()
     .addTrees([appTree, publicTree])
     .addBower()
-    .addTransformer(new broccoli.CompilerCollection()
-      .addCompiler(new ES6ConcatenatorCompiler({
-          loaderFile: 'loader.js',
-          ignoredModules: [
-            'resolver'
-          ],
-          inputFiles: [
-            'appkit/**/*.js'
-          ],
-          legacyFilesToAppend: [
-            'jquery.js',
-            'handlebars.js',
-            'ember.js',
-            'ember-data.js',
-            'ember-resolver.js'
-          ],
-          outputFile: '/assets/app.js'
-        })
-        .setWrapInEval(factory.env !== 'production')
-      )
-      .addCompiler(new StaticCompiler({
-        srcDir: 'appkit-public',
-        destDir: '/'
-      }))
-      .addCompiler(new StaticCompiler({
-        srcDir: '/appkit',
-        files: ['*.html'],
-        destDir: '/'
-      }))
-    )
+
+  var applicationJS = new ES6ConcatenatorCompiler({
+    inputTrees: inputTrees,
+    loaderFile: 'loader.js',
+    ignoredModules: [
+      'resolver'
+    ],
+    mainFiles: [
+      'appkit/**/*.js'
+    ],
+    legacyFilesToAppend: [
+      'jquery.js',
+      'handlebars.js',
+      'ember.js',
+      'ember-data.js',
+      'ember-resolver.js'
+    ],
+    outputFile: '/assets/app.js',
+    wrapInEval: factory.env !== 'production'
+  })
 
   if (factory.env === 'production') {
-    outputTree.addTransformer(new UglifyJSFilter({
+    applicationJS.addTransformer(new UglifyJSFilter({
       // mangle: false,
       // compress: false
     }))
   }
 
-  return outputTree
+  var applicationCSS = new SassCompiler({
+    inputTrees: inputTrees,
+    mainFile: '/appkit/application.css',
+    outputFile: '/assets/application.css'
+  })
+
+  var publicTree = factory.makeTree()
+    .map('public', '/')
+
+  var moreStaticFiles = new StaticCompiler({
+    inputTrees: inputTrees,
+    srcDir: '/appkit',
+    files: ['*.html'],
+    destDir: '/'
+  })
+
+  return [applicationJS, applicationCSS, publicTree, moreStaticFiles]
 }
