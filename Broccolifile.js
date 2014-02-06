@@ -1,69 +1,63 @@
 module.exports = function (factory, broccoli) {
-  var CoffeeScriptFilter = require('broccoli-coffee')(broccoli)
-  var TemplateFilter = require('broccoli-template')(broccoli)
-  var UglifyJSFilter = require('broccoli-uglify-js')(broccoli)
-  var ES6ConcatenatorCompiler = require('broccoli-es6-concatenator')(broccoli)
-  var StaticCompiler = require('broccoli-static-compiler')(broccoli)
+  var filterCoffeeScript = require('broccoli-coffee')(broccoli)
+  var filterTemplates = require('broccoli-template')(broccoli)
+  var uglifyJavaScript = require('broccoli-uglify-js')(broccoli)
+  var compileES6 = require('broccoli-es6-concatenator')(broccoli)
+  var pickFiles = require('broccoli-static-compiler')(broccoli)
 
   var appTree = factory.makeTree()
     .map('app', '/appkit')
-    .addTransformer(new TemplateFilter({
-      extensions: ['hbs', 'handlebars'],
-      compileFunction: 'Ember.Handlebars.compile'
-    }))
-    .addTransformer(new CoffeeScriptFilter({
-      bare: true
-    }))
 
   if (factory.env !== 'production') {
     appTree.map('tests', '/appkit/tests')
   }
 
-  var publicTree = factory.makeTree()
-    // The public files get a completely separate namespace so we don't
-    // accidentally match them with compiler glob patterns
-    .map('public', '/appkit-public')
+  appTree = filterTemplates(appTree, {
+    extensions: ['hbs', 'handlebars'],
+    compileFunction: 'Ember.Handlebars.compile'
+  })
+  appTree = filterCoffeeScript(appTree, {
+    bare: true
+  })
 
-  var outputTree = factory.makeTree()
-    .addTrees([appTree, publicTree])
-    .addBower()
-    .addTransformer(new broccoli.CompilerCollection()
-      .addCompiler(new ES6ConcatenatorCompiler({
-          loaderFile: 'loader.js',
-          ignoredModules: [
-            'resolver'
-          ],
-          inputFiles: [
-            'appkit/**/*.js'
-          ],
-          legacyFilesToAppend: [
-            'jquery.js',
-            'handlebars.js',
-            'ember.js',
-            'ember-data.js',
-            'ember-resolver.js'
-          ],
-          outputFile: '/assets/app.js'
-        })
-        .setWrapInEval(factory.env !== 'production')
-      )
-      .addCompiler(new StaticCompiler({
-        srcDir: 'appkit-public',
-        destDir: '/'
-      }))
-      .addCompiler(new StaticCompiler({
-        srcDir: '/appkit',
-        files: ['*.html'],
-        destDir: '/'
-      }))
-    )
+  var inputTree = new broccoli.MergedTree(
+    [appTree]
+    .concat(broccoli.bowerTrees())
+  )
+
+  var indexHtml = pickFiles(inputTree, {
+    srcDir: '/appkit',
+    files: ['*.html'],
+    destDir: '/'
+  })
+
+  applicationJs = compileES6(inputTree, {
+    loaderFile: 'loader.js',
+    ignoredModules: [
+      'resolver'
+    ],
+    inputFiles: [
+      'appkit/**/*.js'
+    ],
+    legacyFilesToAppend: [
+      'jquery.js',
+      'handlebars.js',
+      'ember.js',
+      'ember-data.js',
+      'ember-resolver.js'
+    ],
+    outputFile: '/assets/app.js'
+  }).setWrapInEval(factory.env !== 'production')
 
   if (factory.env === 'production') {
-    outputTree.addTransformer(new UglifyJSFilter({
+    applicationJs = uglifyJavaScript(applicationJs, {
       // mangle: false,
       // compress: false
-    }))
+    })
   }
 
-  return outputTree
+  var publicTree = factory.makeTree()
+    .map('public', '/')
+
+  return [applicationJs, publicTree, indexHtml]
 }
