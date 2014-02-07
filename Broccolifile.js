@@ -1,28 +1,43 @@
-module.exports = function (factory, broccoli) {
-  var filterCoffeeScript = require('broccoli-coffee')(broccoli)
-  var filterTemplates = require('broccoli-template')(broccoli)
-  var uglifyJavaScript = require('broccoli-uglify-js')(broccoli)
-  var compileES6 = require('broccoli-es6-concatenator')(broccoli)
-  var pickFiles = require('broccoli-static-compiler')(broccoli)
+module.exports = function (broccoli) {
+  var filterCoffeeScript = require('broccoli-coffee')
+  var filterTemplates = require('broccoli-template')
+  var uglifyJavaScript = require('broccoli-uglify-js')
+  var compileES6 = require('broccoli-es6-concatenator')
+  var pickFiles = require('broccoli-static-compiler')
+  var env = require('broccoli-env').getEnv()
 
-  var appTree = factory.makeTree()
-    .map('app', '/appkit')
-
-  if (factory.env !== 'production') {
-    appTree.map('tests', '/appkit/tests')
+  function preprocess (tree) {
+    tree = filterTemplates(tree, {
+      extensions: ['hbs', 'handlebars'],
+      compileFunction: 'Ember.Handlebars.compile'
+    })
+    tree = filterCoffeeScript(tree, {
+      bare: true
+    })
+    return tree
   }
 
-  appTree = filterTemplates(appTree, {
-    extensions: ['hbs', 'handlebars'],
-    compileFunction: 'Ember.Handlebars.compile'
+  var app = broccoli.read('app')
+  app = pickFiles(app, {
+    srcDir: '/',
+    destDir: 'appkit' // move under namespace
   })
-  appTree = filterCoffeeScript(appTree, {
-    bare: true
+  app = preprocess(app)
+
+  var tests = broccoli.read('tests')
+  tests = pickFiles(tests, {
+    srcDir: '/',
+    destDir: 'appkit/tests'
   })
+  tests = preprocess(tests)
+
+  var sourceTrees = [app]
+  if (env !== 'production') {
+    sourceTrees.push(tests)
+  }
 
   var inputTree = new broccoli.MergedTree(
-    [appTree]
-    .concat(broccoli.bowerTrees())
+    sourceTrees.concat(broccoli.bowerTrees())
   )
 
   var indexHtml = pickFiles(inputTree, {
@@ -46,18 +61,18 @@ module.exports = function (factory, broccoli) {
       'ember-data.js',
       'ember-resolver.js'
     ],
+    wrapInEval: env !== 'production',
     outputFile: '/assets/app.js'
-  }).setWrapInEval(factory.env !== 'production')
+  })
 
-  if (factory.env === 'production') {
+  if (env === 'production') {
     applicationJs = uglifyJavaScript(applicationJs, {
       // mangle: false,
       // compress: false
     })
   }
 
-  var publicTree = factory.makeTree()
-    .map('public', '/')
+  var public = broccoli.read('public')
 
-  return [applicationJs, publicTree, indexHtml]
+  return [applicationJs, public, indexHtml]
 }

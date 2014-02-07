@@ -57,6 +57,7 @@
     "broccoli-template": "latest",
     "broccoli-es6-concatenator": "latest",
     "broccoli-static-compiler": "latest",
-    "broccoli-uglify-js": "latest"
-  }
+    "broccoli-uglify-js": "latest",
+    "broccoli-env": "0.0.1"
+  },
 }
