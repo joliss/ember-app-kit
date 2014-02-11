@@ -20,7 +20,7 @@ module.exports = function (broccoli) {
   var app = broccoli.read('app')
   app = pickFiles(app, {
     srcDir: '/',
-    destDir: 'appkit' // move under namespace
+    destDir: 'appkit' // move into namespace
   })
   app = preprocess(app)
 
@@ -35,18 +35,11 @@ module.exports = function (broccoli) {
   if (env !== 'production') {
     sourceTrees.push(tests)
   }
-
-  var inputTree = new broccoli.MergedTree(
+  var appAndDependencies = new broccoli.MergedTree(
     sourceTrees.concat(broccoli.bowerTrees())
   )
 
-  var indexHtml = pickFiles(inputTree, {
-    srcDir: '/appkit',
-    files: ['*.html'],
-    destDir: '/'
-  })
-
-  applicationJs = compileES6(inputTree, {
+  applicationJs = compileES6(appAndDependencies, {
     loaderFile: 'loader.js',
     ignoredModules: [
       'resolver'
@@ -71,6 +64,12 @@ module.exports = function (broccoli) {
       // compress: false
     })
   }
+
+  var indexHtml = pickFiles(app, {
+    srcDir: '/appkit',
+    files: ['*.html'],
+    destDir: '/'
+  })
 
   var public = broccoli.read('public')
 
