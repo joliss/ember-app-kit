@@ -17,14 +17,14 @@ module.exports = function (broccoli) {
     return tree
   }
 
-  var app = broccoli.read('app')
+  var app = broccoli.makeTree('app')
   app = pickFiles(app, {
     srcDir: '/',
     destDir: 'appkit' // move into namespace
   })
   app = preprocess(app)
 
-  var tests = broccoli.read('tests')
+  var tests = broccoli.makeTree('tests')
   tests = pickFiles(tests, {
     srcDir: '/',
     destDir: 'appkit/tests'
@@ -71,7 +71,7 @@ module.exports = function (broccoli) {
     destDir: '/'
   })
 
-  var public = broccoli.read('public')
+  var public = broccoli.makeTree('public')
 
   return [applicationJs, public, indexHtml]
 }
